@@ -45,8 +45,8 @@
 
 #include "g_game.h"
 
-#define SAVEGAMESIZE    0x100000 // FS: Was 0x2c000
-#define SAVESTRINGSIZE  256 // FS: Was 24
+#define SAVEGAMESIZE    0x2c000 // 0x100000 // FS: Was 0x2c000  // 2024/09/19 restore vanilla limits
+#define SAVESTRINGSIZE  24 // 256 // FS: Was 24
 
 
 
@@ -55,8 +55,8 @@ void	G_ReadDemoTiccmd (ticcmd_t* cmd);
 void	G_WriteDemoTiccmd (ticcmd_t* cmd); 
 void	G_PlayerReborn (int player); 
 void	G_InitNew (skill_t skill, int episode, int map); 
-int	savegamesize = 0x100000; // FS: Normally 0x2c000
-int	savestringsize = 256; // FS: Normally 24
+int	savegamesize = 0x2c000; // FS: Normally 0x2c000  // 2024/09/21 restore vanilla limits
+int	savestringsize = 24; // FS: Normally 24
 
 void	G_DoReborn (int playernum); 
  
@@ -236,11 +236,11 @@ void G_BuildTiccmd (ticcmd_t* cmd)
     strafe = gamekeydown[key_strafe] || mousebuttons[mousebstrafe] || joybuttons[joybstrafe]; 
     speed = gamekeydown[key_speed] || joybuttons[joybspeed];
 
-	if (!demoplayback)
+	/*if (!demoplayback)  // 2024/09/21 commented out as this seems to break the speed up key
 	{
 		if (gamekeydown[key_speed] || joybuttons[joybspeed]) // FS: could cheat with ultrafast movement, from DOSDOOM.
 			speed = !speed;
-	}
+	}*/
 
     forward = side = 0;
    
