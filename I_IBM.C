@@ -7,6 +7,8 @@
 #include <graph.h>
 
 #include "doomdata.h"
+#include "m_bbox.h"
+#include "i_video.h"
 #include "R_local.h"
 #include "sounds.h"
 #include "i_sound.h"
@@ -987,76 +989,259 @@ void I_SetPalette(byte *palette)
 ============================================================================
 */
 
-byte *pcscreen, *destscreen, *destview;
-
+byte *pcscreen, *currentscreen, *destscreen, *destview;
 
 /*
-==============
+===================
 =
-= I_Update
+= I_UpdateBox
 =
-==============
+===================
 */
 
-void I_Update (void)
+#define PLANEWIDTH	80
+
+void I_UpdateBox(int x, int y, int w, int h)
 {
-//
-// blit screen to video
-//
-  memcpy(pcscreen, screens[0], SCREENHEIGHT*SCREENWIDTH);
+    int i, j, k, count;
+    int sp_x1, sp_x2;
+    int poffset;
+    int offset;
+    int pstep;
+    int step;
+    byte *dest, *source;
+
+    if (x < 0 || y < 0 || w <= 0 || h <= 0
+     || x + w > SCREENWIDTH || y + h > SCREENHEIGHT)
+    {
+        I_Error("Bad I_UpdateBox (%i, %i, %i, %i)", x, y, w, h);
+    }
+
+    sp_x1 = x / 8;
+    sp_x2 = (x + w) / 8;
+    count = sp_x2 - sp_x1 + 1;
+    offset = y * SCREENWIDTH + sp_x1 * 8;
+    step = SCREENWIDTH - count * 8;
+    poffset = offset / 4;
+    pstep = step / 4;
+
+    outp(SC_INDEX, SC_MAPMASK);
+
+    for (i = 0; i < 4; i++)
+    {
+        outp(SC_INDEX + 1, 1 << i);
+        source = &screens[0][offset + i];
+        dest = destscreen + poffset;
+
+        for (j = 0; j < h; j++)
+        {
+            k = count;
+            while (k--)
+            {
+                *(unsigned short *)dest = (unsigned short)(((*(source + 4)) << 8) + (*source));
+                dest += 2;
+                source += 8;
+            }
+
+            source += step;
+            dest += pstep;
+        }
+    }
 }
 
-//--------------------------------------------------------------------------
-//
-// PROC I_InitGraphics
-//
-//--------------------------------------------------------------------------
+/*
+===================
+=
+= I_UpdateNoBlit
+=
+===================
+*/
 
-void I_InitGraphics(void)
+int olddb[2][4];
+void I_UpdateNoBlit(void)
 {
-//	grmode = 1; // FS: Now in CFG
-	regs.w.ax = 0x13;
-	int386(0x10, &regs, &regs);//(const union REGS *)&regs, &regs); // FS: Compiler Warning?
-	pcscreen = destscreen = (byte *)0xa0000;
+    int realdr[4];
+    int x, y, w, h;
+    // Set current screen
+    currentscreen = destscreen;
+
+    // Update dirtybox size
+    realdr[BOXTOP] = dirtybox[BOXTOP];
+    if (realdr[BOXTOP] < olddb[0][BOXTOP])
+    {
+        realdr[BOXTOP] = olddb[0][BOXTOP];
+    }
+    if (realdr[BOXTOP] < olddb[1][BOXTOP])
+    {
+        realdr[BOXTOP] = olddb[1][BOXTOP];
+    }
+
+    realdr[BOXRIGHT] = dirtybox[BOXRIGHT];
+    if (realdr[BOXRIGHT] < olddb[0][BOXRIGHT])
+    {
+        realdr[BOXRIGHT] = olddb[0][BOXRIGHT];
+    }
+    if (realdr[BOXRIGHT] < olddb[1][BOXRIGHT])
+    {
+        realdr[BOXRIGHT] = olddb[1][BOXRIGHT];
+    }
+
+    realdr[BOXBOTTOM] = dirtybox[BOXBOTTOM];
+    if (realdr[BOXBOTTOM] > olddb[0][BOXBOTTOM])
+    {
+        realdr[BOXBOTTOM] = olddb[0][BOXBOTTOM];
+    }
+    if (realdr[BOXBOTTOM] > olddb[1][BOXBOTTOM])
+    {
+        realdr[BOXBOTTOM] = olddb[1][BOXBOTTOM];
+    }
+
+    realdr[BOXLEFT] = dirtybox[BOXLEFT];
+    if (realdr[BOXLEFT] > olddb[0][BOXLEFT])
+    {
+        realdr[BOXLEFT] = olddb[0][BOXLEFT];
+    }
+    if (realdr[BOXLEFT] > olddb[1][BOXLEFT])
+    {
+        realdr[BOXLEFT] = olddb[1][BOXLEFT];
+    }
+
+    // Leave current box for next update
+    memcpy(olddb[0], olddb[1], 16);
+    memcpy(olddb[1], dirtybox, 16);
+
+    // Update screen
+    if (realdr[BOXBOTTOM] <= realdr[BOXTOP])
+    {
+        x = realdr[BOXLEFT];
+        y = realdr[BOXBOTTOM];
+        w = realdr[BOXRIGHT] - realdr[BOXLEFT] + 1;
+        h = realdr[BOXTOP] - realdr[BOXBOTTOM] + 1;
+        I_UpdateBox(x, y, w, h);
+    }
+    // Clear box
+    M_ClearBox(dirtybox);
+}
+
+/*
+===================
+=
+= I_FinishUpdate
+=
+===================
+*/
+
+void I_FinishUpdate (void)
+{
+    static int lasttic;
+    int tics;
+    int i;
+    if (devparm)
+    {
+        i = ticcount;
+        tics = i - lasttic;
+        lasttic = i;
+        if (tics > 20) tics = 20;
+        outpw(SC_INDEX, 0x102);
+        for (i = 0; i < tics; i++)
+        {
+            destscreen[(SCREENHEIGHT - 1)*SCREENWIDTH / 4 + i] = 0xff;
+        }
+        for (; i < 20; i++)
+        {
+            destscreen[(SCREENHEIGHT - 1)*SCREENWIDTH / 4 + i] = 0x0;
+        }
+    }
+    outpw(CRTC_INDEX, ((int)destscreen & 0xff00) + 0xc);
+
+    //Next plane
+    destscreen += 0x4000;
+    if (destscreen == (byte*)0xac000)
+    {
+        destscreen = (byte*)0xa0000;
+    }
+}
+
+/*
+===================
+=
+= I_InitGraphics
+=
+===================
+*/
+
+void I_InitGraphics (void)
+{
+    if (novideo)
+    {
+        return;
+    }
+//    grmode = true; // FS: Now in CFG
+    regs.w.ax = 0x13;
+    int386(0x10, (union REGS *)&regs, &regs);
+    pcscreen = currentscreen = (byte *)0xa0000;
+    destscreen = (byte *)0xa4000;
+
+    outp(SC_INDEX, SC_MEMMODE);
+    outp(SC_INDEX + 1, (inp(SC_INDEX + 1)&~8) | 4);
+    outp(GC_INDEX, GC_MODE);
+    outp(GC_INDEX + 1, inp(GC_INDEX + 1)&~0x13);
+    outp(GC_INDEX, GC_MISCELLANEOUS);
+    outp(GC_INDEX + 1, inp(GC_INDEX + 1)&~2);
+    outpw(SC_INDEX, 0xf02);
+    memset(pcscreen, 0, 0x10000);
+    outp(CRTC_INDEX, CRTC_UNDERLINE);
+    outp(CRTC_INDEX + 1, inp(CRTC_INDEX + 1)&~0x40);
+    outp(CRTC_INDEX, CRTC_MODE);
+    outp(CRTC_INDEX + 1, inp(CRTC_INDEX + 1) | 0x40);
+    outp(GC_INDEX, GC_READMAP);
+
 	I_SetPalette(W_CacheLumpName(DEH_String("PLAYPAL"), PU_CACHE));
-	I_InitDiskFlash();
+    I_InitDiskFlash();
 }
 
-//--------------------------------------------------------------------------
-//
-// PROC I_ShutdownGraphics
-//
-//--------------------------------------------------------------------------
+/*
+===================
+=
+= I_ShutdownGraphics
+=
+===================
+*/
 
-void I_ShutdownGraphics(void)
+void I_ShutdownGraphics (void)
 {
-	int	i;
-	extern spritedef_t*	sprites;
-	
-	dprintf("I_ShutdownGraphics()\n"); // FS: DEBUG
-	Z_Free(saved_background);
-	Z_Free(disk_image);
-	Z_Free(flattranslation);
-	Z_Free(sprites);
-	
-	if(*(byte *)0x449 == 0x13) // don't reset mode if it didn't get set
+    if (*(byte *)0x449 == 0x13) // don't reset mode if it didn't get set
+    {
+        regs.w.ax = 3;
+        int386(0x10, &regs, &regs); // back to text mode
+    }
+}
+
+/*
+===================
+=
+= I_ReadScreen
+=
+= Reads the screen currently displayed into a linear buffer.
+=
+===================
+*/
+
+void I_ReadScreen (byte *scr)
+{
+	int i;
+	int j;
+
+	outp(GC_INDEX, GC_READMAP);
+
+	for (i = 0; i < 4; i++)
 	{
-		regs.w.ax = 3;
-		int386(0x10, &regs, &regs); // back to text mode
+		outp(GC_INDEX+1, i);
+		for (j = 0; j < SCREENWIDTH*SCREENHEIGHT/4; j++)
+		{
+			scr[i+j*4] = currentscreen[j];
+		}
 	}
-}
-
-//--------------------------------------------------------------------------
-//
-// PROC I_ReadScreen
-//
-// Reads the screen currently displayed into a linear buffer.
-//
-//--------------------------------------------------------------------------
-
-void I_ReadScreen(byte *scr)
-{
-        memcpy(scr, screens[0], SCREENWIDTH*SCREENHEIGHT);
 }
 
 
@@ -1075,11 +1260,8 @@ void I_ReadScreen(byte *scr)
 ===================
 */
 
-
-#define SC_UPARROW              0x48
-#define SC_DOWNARROW    0x50
-#define SC_LEFTARROW            0x4b
-#define SC_RIGHTARROW   0x4d
+/*
+ OLD STARTTIC STUFF
 
 void   I_StartTic (void)
 {
@@ -1095,15 +1277,19 @@ void   I_StartTic (void)
 	while (kbdtail < kbdhead)
 	{
 		k = keyboardque[kbdtail&(KBDQUESIZE-1)];
+
+//      if (k==14)
+//              I_Error ("exited");
+
 		kbdtail++;
 
 		// extended keyboard shift key bullshit
-		if ( (k&0x7f)==SC_LSHIFT || (k&0x7f)==SC_RSHIFT )
+		if ( (k&0x7f)==KEY_RSHIFT )
 		{
 			if ( keyboardque[(kbdtail-2)&(KBDQUESIZE-1)]==0xe0 )
 				continue;
 			k &= 0x80;
-			k |= SC_RSHIFT;
+			k |= KEY_RSHIFT;
 		}
 
 		if (k==0xe0)
@@ -1124,47 +1310,105 @@ void   I_StartTic (void)
 		else
 			ev.type = ev_keydown;
 		k &= 0x7f;
-		switch (k)
-		{
-		case SC_UPARROW:
-			ev.data1 = KEY_UPARROW;
-			break;
-		case SC_DOWNARROW:
-			ev.data1 = KEY_DOWNARROW;
-			break;
-		case SC_LEFTARROW:
-			ev.data1 = KEY_LEFTARROW;
-			break;
-		case SC_RIGHTARROW:
-			ev.data1 = KEY_RIGHTARROW;
-			break;
-		default:
-			ev.data1 = scantokey[k];
-			break;
-		}
+
+		ev.data1 = k;
+		//ev.data1 = scantokey[k];
+
 		D_PostEvent (&ev);
 	}
+}
+*/
 
+#define SC_UPARROW              0x48
+#define SC_DOWNARROW    0x50
+#define SC_LEFTARROW            0x4b
+#define SC_RIGHTARROW   0x4d
+
+void   I_StartTic (void)
+{
+    int k;
+    event_t ev;
+
+    I_ReadMouse();
+
+    //
+    // keyboard events
+    //
+    while (kbdtail < kbdhead)
+    {
+        k = keyboardque[kbdtail&(KBDQUESIZE - 1)];
+        kbdtail++;
+
+        // extended keyboard shift key bullshit
+        if ((k & 0x7f) == SC_LSHIFT || (k & 0x7f) == SC_RSHIFT)
+        {
+            if (keyboardque[(kbdtail - 2)&(KBDQUESIZE - 1)] == 0xe0)
+            {
+                continue;
+            }
+            k &= 0x80;
+            k |= SC_RSHIFT;
+        }
+
+        if (k == 0xe0)
+        {
+            continue;   // special / pause keys
+        }
+        if (keyboardque[(kbdtail - 2)&(KBDQUESIZE - 1)] == 0xe1)
+        {
+            continue;   // pause key bullshit
+        }
+        if (k == 0xc5 && keyboardque[(kbdtail - 2)&(KBDQUESIZE - 1)] == 0x9d)
+        {
+            ev.type = ev_keydown;
+            ev.data1 = KEY_PAUSE;
+            D_PostEvent(&ev);
+            continue;
+        }
+
+        if (k & 0x80)
+            ev.type = ev_keyup;
+        else
+            ev.type = ev_keydown;
+        k &= 0x7f;
+        switch (k)
+        {
+        case SC_UPARROW:
+            ev.data1 = KEY_UPARROW;
+            break;
+        case SC_DOWNARROW:
+            ev.data1 = KEY_DOWNARROW;
+            break;
+        case SC_LEFTARROW:
+            ev.data1 = KEY_LEFTARROW;
+            break;
+        case SC_RIGHTARROW:
+            ev.data1 = KEY_RIGHTARROW;
+            break;
+        default:
+            ev.data1 = scantokey[k];
+            break;
+        }
+        D_PostEvent(&ev);
+    }
 }
 
 
 void   I_ReadKeys (void)
 {
-	int             k;
-	event_t ev;
+    int k;
 
-
-	while (1)
-	{
-	   while (kbdtail < kbdhead)
-	   {
-		   k = keyboardque[kbdtail&(KBDQUESIZE-1)];
-		   kbdtail++;
-		   printf ("0x%x\n",k);
-		   if (k == 1)
-			   I_Quit ();
-	   }
-	}
+    while (1)
+    {
+        while (kbdtail < kbdhead)
+        {
+            k = keyboardque[kbdtail&(KBDQUESIZE - 1)];
+            kbdtail++;
+            printf("0x%x\n", k);
+            if (k == 1)
+                I_Quit();
+        }
+    }
 }
 
 /*
@@ -1925,52 +2169,84 @@ void I_InitDiskFlash (void)
 // draw disk icon
 void I_BeginRead (void)
 {
-    byte *screenloc = screens[0]
-                    + (SCREENHEIGHT - LOADING_DISK_H) * SCREENWIDTH
-                    + (SCREENWIDTH - LOADING_DISK_W);
-    int y;
+	byte    *src,*dest;
+	int             y;
 
-    if (!grmode || disk_image == NULL)
-        return;
+	if (!grmode)
+		return;
 
-    // save background and copy the disk image in
+// write through all planes
+	outp (SC_INDEX,SC_MAPMASK);
+	outp (SC_INDEX+1,15);
+// set write mode 1
+	outp (GC_INDEX,GC_MODE);
+	outp (GC_INDEX+1,inp(GC_INDEX+1)|1);
 
-    for (y=0; y<LOADING_DISK_H; ++y)
-    {
-        memcpy(saved_background + y * LOADING_DISK_W,
-               screenloc,
-               LOADING_DISK_W);
-        memcpy(screenloc,
-               disk_image + y * LOADING_DISK_W,
-               LOADING_DISK_W);
+// copy to backup
+	src = currentscreen + 184*80 + 304/4;
+	dest = (byte *)0xac000 + 184*80 + 288/4;
+	for (y=0 ; y<16 ; y++)
+	{
+		dest[0] = src[0];
+		dest[1] = src[1];
+		dest[2] = src[2];
+		dest[3] = src[3];
+		src += 80;
+		dest += 80;
+	}
 
-        screenloc += SCREENWIDTH;
-    }
-	I_Update();
+// copy disk over
+	dest = currentscreen + 184*80 + 304/4;
+	src = (byte *)0xac000 + 184*80 + 304/4;
+	for (y=0 ; y<16 ; y++)
+	{
+		dest[0] = src[0];
+		dest[1] = src[1];
+		dest[2] = src[2];
+		dest[3] = src[3];
+		src += 80;
+		dest += 80;
+	}
+
+
+// set write mode 0
+	outp (GC_INDEX,GC_MODE);
+	outp (GC_INDEX+1,inp(GC_INDEX+1)&~1);
 }
 
 // erase disk icon
 void I_EndRead (void)
 {
-    byte *screenloc = screens[0]
-                    + (SCREENHEIGHT - LOADING_DISK_H) * SCREENWIDTH
-                    + (SCREENWIDTH - LOADING_DISK_W);
-    int y;
+	byte    *src,*dest;
+	int             y;
 
-    if (!grmode || disk_image == NULL)
-        return;
+	if (!grmode)
+		return;
 
-    // save background and copy the disk image in
+// write through all planes
+	outp (SC_INDEX,SC_MAPMASK);
+	outp (SC_INDEX+1,15);
+// set write mode 1
+	outp (GC_INDEX,GC_MODE);
+	outp (GC_INDEX+1,inp(GC_INDEX+1)|1);
 
-    for (y=0; y<LOADING_DISK_H; ++y)
-    {
-        memcpy(screenloc,
-               saved_background + y * LOADING_DISK_W,
-               LOADING_DISK_W);
 
-        screenloc += SCREENWIDTH;
-    }
-	I_Update();
+// copy disk over
+	dest = currentscreen + 184*80 + 304/4;
+	src = (byte *)0xac000 + 184*80 + 288/4;
+	for (y=0 ; y<16 ; y++)
+	{
+		dest[0] = src[0];
+		dest[1] = src[1];
+		dest[2] = src[2];
+		dest[3] = src[3];
+		src += 80;
+		dest += 80;
+	}
+
+// set write mode 0
+	outp (GC_INDEX,GC_MODE);
+	outp (GC_INDEX+1,inp(GC_INDEX+1)&~1);
 }
 
 
