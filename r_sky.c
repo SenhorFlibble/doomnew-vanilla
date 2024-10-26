@@ -1,17 +1,20 @@
+// Emacs style mode select   -*- C++ -*- 
+//-----------------------------------------------------------------------------
 //
-// Copyright (C) 1993-1996 Id Software, Inc.
-// Copyright (C) 2016-2017 Alexey Khokholov (Nuke.YKT)
-// Copyright (C) 2017 Alexandre-Xavier Labonté-Lamoureux
+// $Id:$
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
+// Copyright (C) 1993-1996 by id Software, Inc.
 //
-// This program is distributed in the hope that it will be useful,
+// This source is available for distribution and/or modification
+// only under the terms of the DOOM Source Code License as
+// published by id Software. All rights reserved.
+//
+// The source is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
+// FITNESS FOR A PARTICULAR PURPOSE. See the DOOM Source Code License
+// for more details.
+//
+// $Log:$
 //
 // DESCRIPTION:
 //  Sky rendering. The DOOM sky is a texture map like any
@@ -20,10 +23,13 @@
 //  on a 320 screen?
 //  
 //
+//-----------------------------------------------------------------------------
+
+static const char
+rcsid[] = "$Id: m_bbox.c,v 1.1 1997/02/03 22:45:10 b1 Exp $";
 
 
 // Needed for FRACUNIT.
-#include "doomdef.h"
 #include "m_fixed.h"
 
 // Needed for Flat retrieval.
@@ -50,7 +56,7 @@ int			skytexturemid;
 //
 void R_InitSkyMap (void)
 {
-    skyflatnum = R_FlatNumForName ( SKYFLATNAME );
+  // skyflatnum = R_FlatNumForName ( SKYFLATNAME );
     skytexturemid = 100*FRACUNIT;
 }
 

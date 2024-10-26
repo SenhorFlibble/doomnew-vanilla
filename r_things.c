@@ -1,21 +1,29 @@
+// Emacs style mode select   -*- C++ -*- 
+//-----------------------------------------------------------------------------
 //
-// Copyright (C) 1993-1996 Id Software, Inc.
-// Copyright (C) 2016-2017 Alexey Khokholov (Nuke.YKT)
-// Copyright (C) 2017 Alexandre-Xavier Labonté-Lamoureux
+// $Id:$
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
+// Copyright (C) 1993-1996 by id Software, Inc.
 //
-// This program is distributed in the hope that it will be useful,
+// This source is available for distribution and/or modification
+// only under the terms of the DOOM Source Code License as
+// published by id Software. All rights reserved.
+//
+// The source is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
+// FITNESS FOR A PARTICULAR PURPOSE. See the DOOM Source Code License
+// for more details.
+//
+// $Log:$
 //
 // DESCRIPTION:
 //	Refresh of things, i.e. objects represented by sprites.
 //
+//-----------------------------------------------------------------------------
+
+
+static const char
+rcsid[] = "$Id: r_things.c,v 1.5 1997/02/03 16:47:56 b1 Exp $";
 
 
 #include <stdio.h>
@@ -32,8 +40,6 @@
 #include "r_local.h"
 
 #include "doomstat.h"
-
-
 
 #define MINZ				(FRACUNIT*4)
 #define BASEYCENTER			100
@@ -198,7 +204,7 @@ void R_InitSpriteDefs (char** namelist)
     // Just compare 4 characters as ints
     for (i=0 ; i<numsprites ; i++)
     {
-	spritename = DEH_String(namelist[i]);  // 2024/09/21 DoomNew
+	spritename = DEH_String(namelist[i]);
 	memset (sprtemp,-1, sizeof(sprtemp));
 		
 	maxframe = -1;
