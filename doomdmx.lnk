@@ -36,7 +36,7 @@ FILE i_ibm.obj
 FILE i_ibm_a.OBJ
 FILE i_net.obj
 FILE i_sound.obj
-FILE linear.OBJ
+FILE planar.OBJ
 FILE md5.obj
 FILE m_argv.obj
 FILE m_bbox.obj

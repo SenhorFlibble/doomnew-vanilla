@@ -23,10 +23,7 @@
 #
 # --------------------------------------------------------------------------
 
-# WATASM
-# turns on inline assembly for FixedMul & FixedDiv2
-
-CCOPTS = $(EXTERNOPT) /omaxet /d2 /zp1 /5r /ei /j /zq /i=apodmx
+CCOPTS = $(EXTERNOPT) /omaxet /zp1 /4r /ei /j /zq /i=apodmx
 #CCOPTS = /d2 /odam /zp1 /4r /ei /j /zq /i=apodmx
 
 LOCOBJS = &
@@ -38,7 +35,7 @@ LOCOBJS = &
  i_sound.obj &
  i_cyber.obj &
  i_net.obj &
- linear.obj &
+ planar.obj &
  tables.obj &
  f_finale.obj &
  f_wipe.obj  &
@@ -111,14 +108,14 @@ d.exe : $(LOCOBJS) i_ibm.obj
  wlink @doomnew.lnk
  copy d.exe stripd.exe
  wstrip stripd.exe
- msdos 4gwbind 4gwpro.exe stripd.exe doomnew.exe -V 
- copy /y doomnew.exe c:\dos\doom19\doomnew.exe
-# copy /y CHANGES.TXT D:\proj\doom\doom
-# copy /y TODO.TXT D:\proj\doom\doom
+ 4gwbind 4gwpro.exe stripd.exe doomnew.exe -V 
+ copy /y doomnew.exe D:\PROJ\doom\doom
+ copy /y CHANGES.TXT D:\proj\doom\doom
+ copy /y TODO.TXT D:\proj\doom\doom
 # sb /R /O doomnew.exe #Uncomment this to use DOS32/a
 
 i_ibm.obj:
- wcc386 /zp1 /d2 /5r /zq /ei /j /i=apodmx i_ibm.c
+ wcc386 /zp1 /4r /zq /ei /j /i=apodmx i_ibm.c
 
 .c.obj :
  wcc386 $(CCOPTS) $[*
@@ -148,7 +145,7 @@ final : .SYMBOLIC
  copy d.exe stripd.exe
  wstrip stripd.exe
  4gwbind 4gwpro.exe stripd.exe doomnew.exe -V 
- copy /y doomnew.exe c:\dos\doom19\doomnew.exe
-# copy /y CHANGES.TXT D:\proj\doom\doom
-# copy /y TODO.TXT D:\proj\doom\doom
-# sb /R /O doomnew.exe
+ copy /y doomnew.exe D:\PROJ\doom\doom
+ copy /y CHANGES.TXT D:\proj\doom\doom
+ copy /y TODO.TXT D:\proj\doom\doom
+ sb /R /O doomnew.exe
