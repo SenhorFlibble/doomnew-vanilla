@@ -1,7 +1,11 @@
+// Emacs style mode select   -*- C++ -*- 
+//-----------------------------------------------------------------------------
 //
-// Copyright (C) 1993-1996 Id Software, Inc.
+// $Id:$
+//
+// Copyright (C) 1993-1996 by id Software, Inc.
+// Copyright (C) 2012-2015 Frank Sapone (Maraakate)
 // Copyright (C) 2016-2017 Alexey Khokholov (Nuke.YKT)
-// Copyright (C) 2017 Alexandre-Xavier Labonté-Lamoureux
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -13,11 +17,18 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
+// $Log:$
+//
 // DESCRIPTION:
 //	Here is a core component: drawing the floors and ceilings,
 //	 while maintaining a per column clipping list only.
 //	Moreover, the sky areas have to be determined.
 //
+//-----------------------------------------------------------------------------
+
+
+static const char
+rcsid[] = "$Id: r_plane.c,v 1.4 1997/02/03 16:47:55 b1 Exp $";
 
 #include <stdlib.h>
 
@@ -41,14 +52,14 @@ planefunction_t		ceilingfunc;
 //
 
 // Here comes the obnoxious "visplane".
-#define MAXVISPLANES	128
+#define MAXVISPLANES	128 //2024/10/26: restored from 1024 // FS: Was 128
 visplane_t		visplanes[MAXVISPLANES];
 visplane_t*		lastvisplane;
 visplane_t*		floorplane;
 visplane_t*		ceilingplane;
 
 // ?
-#define MAXOPENINGS	SCREENWIDTH*64
+#define MAXOPENINGS	SCREENWIDTH*64 // 2024/10/26: restored from 256 // FS: Was SCREENWIDTH*64
 short			openings[MAXOPENINGS];
 short*			lastopening;
 
@@ -235,7 +246,7 @@ R_FindPlane
 	return check;
 		
     if (lastvisplane - visplanes == MAXVISPLANES)
-	I_Error ("R_FindPlane: no more visplanes");
+		I_Error ("R_FindPlane: no more visplanes");
 		
     lastvisplane++;
 
@@ -306,7 +317,7 @@ R_CheckPlane
     lastvisplane->picnum = pl->picnum;
     lastvisplane->lightlevel = pl->lightlevel;
     
-    // fix: prevent the stack from being trashed
+    // fix: prevent the stack from being trashed  // 2024/10/26 copied from Doom Vanille
     if (lastvisplane - visplanes == MAXVISPLANES)
 	I_Error ("R_CheckPlane: no more visplanes");
     
