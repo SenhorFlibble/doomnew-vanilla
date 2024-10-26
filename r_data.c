@@ -1,4 +1,22 @@
-// R_data.c
+//
+// Copyright (C) 1993-1996 Id Software, Inc.
+// Copyright (C) 2016-2017 Alexey Khokholov (Nuke.YKT)
+// Copyright (C) 2017 Alexandre-Xavier Labonté-Lamoureux
+//
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// DESCRIPTION:
+//	Preparation of data for rendering,
+//	generation of lookups, caching, retrieval by name.
+//
 
 #include "i_system.h"
 #include "z_zone.h"
@@ -13,6 +31,9 @@
 
 #include "doomstat.h"
 #include "r_sky.h"
+
+#include  <alloca.h>
+
 
 #include "r_data.h"
 
@@ -318,8 +339,8 @@ void R_GenerateLookup (int texnum)
     {
 	if (!patchcount[x])
 	{
-	    printf ("R_GenerateLookup: column without a patch (%s)\n",
-		    texture->name);
+	    printf ("R_GenerateLookup: Column %d is without a patch in texture %s\n",
+		    x, texture->name);
 	    return;
 	}
 	// I_Error ("R_GenerateLookup: column without a patch");
@@ -413,7 +434,7 @@ void R_InitTextures (void)
     
     // Load the patch names from pnames.lmp.
     name[8] = 0;	
-    names = W_CacheLumpName (DEH_String("PNAMES"), PU_STATIC);
+    names = W_CacheLumpName (DEH_String("PNAMES"), PU_STATIC);  // 2024/09/21 DoomNew
     nummappatches = LONG ( *((int *)names) );
     name_p = names+4;
     patchlookup = alloca (nummappatches*sizeof(*patchlookup));
@@ -428,16 +449,16 @@ void R_InitTextures (void)
     // Load the map texture definitions from textures.lmp.
     // The data is contained in one or two lumps,
     //  TEXTURE1 for shareware, plus TEXTURE2 for commercial.
-    maptex = maptex1 = W_CacheLumpName (DEH_String("TEXTURE1"), PU_STATIC);
+    maptex = maptex1 = W_CacheLumpName (DEH_String("TEXTURE1"), PU_STATIC);  // 2024/09/21 DoomNew
     numtextures1 = LONG(*maptex);
-    maxoff = W_LumpLength (W_GetNumForName (DEH_String("TEXTURE1")));
+    maxoff = W_LumpLength (W_GetNumForName (DEH_String("TEXTURE1")));  // 2024/09/21 DoomNew
     directory = maptex+1;
 	
-    if (W_CheckNumForName (DEH_String("TEXTURE2")) != -1)
+    if (W_CheckNumForName (DEH_String("TEXTURE2")) != -1)  // 2024/09/21 DoomNew
     {
-	maptex2 = W_CacheLumpName (DEH_String("TEXTURE2"), PU_STATIC);
+	maptex2 = W_CacheLumpName (DEH_String("TEXTURE2"), PU_STATIC);  // 2024/09/21 DoomNew
 	numtextures2 = LONG(*maptex2);
-	maxoff2 = W_LumpLength (W_GetNumForName (DEH_String("TEXTURE2")));
+	maxoff2 = W_LumpLength (W_GetNumForName (DEH_String("TEXTURE2")));  // 2024/09/21 DoomNew
     }
     else
     {
@@ -456,10 +477,10 @@ void R_InitTextures (void)
     textureheight = Z_Malloc (numtextures*4, PU_STATIC, 0);
 
     totalwidth = 0;
-
+    
     //	Really complex printing shit...
-    temp1 = W_GetNumForName (DEH_String("S_START"));  // P_???????
-    temp2 = W_GetNumForName (DEH_String("S_END")) - 1;
+    temp1 = W_GetNumForName (DEH_String("S_START"));  // P_???????  // 2024/09/21 DoomNew
+    temp2 = W_GetNumForName (DEH_String("S_END")) - 1;  // 2024/09/21 DoomNew
     temp3 = ((temp2-temp1+63)/64) + ((numtextures+63)/64);
     printf("[");
     for (i = 0; i < temp3; i++)
@@ -468,7 +489,7 @@ void R_InitTextures (void)
     for (i = 0; i < temp3; i++)
 	printf("\x8");
     printf("\x8\x8\x8\x8\x8\x8\x8\x8\x8\x8");	
-
+	
     for (i=0 ; i<numtextures ; i++, directory++)
     {
 	if (!(i&63))
@@ -550,15 +571,15 @@ void R_InitFlats (void)
 {
     int		i;
 	
-    firstflat = W_GetNumForName (DEH_String("F_START")) + 1;
-    lastflat = W_GetNumForName (DEH_String("F_END")) - 1;
+    firstflat = W_GetNumForName (DEH_String("F_START")) + 1;  // 2024/09/21 DoomNew
+    lastflat = W_GetNumForName (DEH_String("F_END")) - 1;  // 2024/09/21 DoomNew
     numflats = lastflat - firstflat + 1;
 	
     // Create translation table for global animation.
     flattranslation = Z_Malloc ((numflats+1)*4, PU_STATIC, 0);
     
     for (i=0 ; i<numflats ; i++)
-		flattranslation[i] = i;
+	flattranslation[i] = i;
 }
 
 
@@ -573,8 +594,8 @@ void R_InitSpriteLumps (void)
     int		i;
     patch_t	*patch;
 	
-    firstspritelump = W_GetNumForName (DEH_String("S_START")) + 1;
-    lastspritelump = W_GetNumForName (DEH_String("S_END")) - 1;
+    firstspritelump = W_GetNumForName (DEH_String("S_START")) + 1;  // 2024/09/21 DoomNew
+    lastspritelump = W_GetNumForName (DEH_String("S_END")) - 1;  // 2024/09/21 DoomNew
     
     numspritelumps = lastspritelump - firstspritelump + 1;
     spritewidth = Z_Malloc (numspritelumps*4, PU_STATIC, 0);
@@ -604,7 +625,7 @@ void R_InitColormaps (void)
     
     // Load in the light tables, 
     //  256 byte align tables.
-    lump = W_GetNumForName(DEH_String("COLORMAP")); 
+    lump = W_GetNumForName(DEH_String("COLORMAP"));  // 2024/09/21 DoomNew
     length = W_LumpLength (lump) + 255; 
     colormaps = Z_Malloc (length, PU_STATIC, 0); 
     colormaps = (byte *)( ((int)colormaps + 255)&~0xff); 
@@ -621,13 +642,13 @@ void R_InitColormaps (void)
 //
 void R_InitData (void)
 {
-	R_InitTextures ();
-	printf (".");
-	R_InitFlats ();
-	printf (".");
-	R_InitSpriteLumps ();
-	printf (".");
-	R_InitColormaps ();
+    R_InitTextures ();
+    printf (".");
+    R_InitFlats ();
+    printf (".");
+    R_InitSpriteLumps ();
+    printf (".");
+    R_InitColormaps ();
 }
 
 
