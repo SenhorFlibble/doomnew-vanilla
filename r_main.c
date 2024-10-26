@@ -1,39 +1,36 @@
-// Emacs style mode select   -*- C++ -*- 
-//-----------------------------------------------------------------------------
 //
-// $Id:$
+// Copyright (C) 1993-1996 Id Software, Inc.
+// Copyright (C) 2016-2017 Alexey Khokholov (Nuke.YKT)
+// Copyright (C) 2017 Alexandre-Xavier Labonté-Lamoureux
 //
-// Copyright (C) 1993-1996 by id Software, Inc.
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
 //
-// This source is available for distribution and/or modification
-// only under the terms of the DOOM Source Code License as
-// published by id Software. All rights reserved.
-//
-// The source is distributed in the hope that it will be useful,
+// This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// FITNESS FOR A PARTICULAR PURPOSE. See the DOOM Source Code License
-// for more details.
-//
-// $Log:$
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
 //
 // DESCRIPTION:
 //	Rendering main loop and setup functions,
 //	 utility functions (BSP, geometry, trigonometry).
 //	See tables.c, too.
 //
-//-----------------------------------------------------------------------------
-
-
-static const char rcsid[] = "$Id: r_main.c,v 1.5 1997/02/03 22:45:12 b1 Exp $";
 
 
 
 #include <stdlib.h>
+#include <math.h>
+
 
 #include "doomdef.h"
 #include "d_net.h"
 
 #include "m_bbox.h"
+
+#include "m_misc.h"
 
 #include "r_local.h"
 #include "r_sky.h"
@@ -271,6 +268,20 @@ R_PointOnSegSide
     return 1;			
 }
 
+int
+SlopeDiv
+( unsigned	num,
+  unsigned	den)
+{
+    unsigned 	ans;
+    
+    if (den < 512)
+	return SLOPERANGE;
+
+    ans = (num<<3)/(den>>8);
+
+    return ans <= SLOPERANGE ? ans : SLOPERANGE;
+}
 
 //
 // R_PointToAngle
@@ -777,6 +788,7 @@ void R_Init (void)
     R_InitTables ();
     // viewwidth / viewheight / detailLevel are set by the defaults
     printf (".");
+
     R_SetViewSize (screenblocks, detailLevel);
     R_InitPlanes ();
     printf (".");
@@ -856,6 +868,7 @@ void R_SetupFrame (player_t* player)
 		
     framecount++;
     validcount++;
+    destview = destscreen + (viewwindowy*SCREENWIDTH/4) + (viewwindowx >> 2);
 }
 
 
