@@ -7,8 +7,6 @@
 #include <graph.h>
 
 #include "doomdata.h"
-#include "m_bbox.h"
-#include "i_video.h"
 #include "R_local.h"
 #include "sounds.h"
 #include "i_sound.h"
@@ -22,6 +20,7 @@
 #include "d_event.h"
 #include "doomdef.h"
 #include "oldnew.h" // FS: For toggling old code
+#include "m_bbox.h" // 2024/10/26 added for Graphics mode functions from Doom Vanille
 
 // Macros
 
@@ -989,18 +988,31 @@ void I_SetPalette(byte *palette)
 ============================================================================
 */
 
-byte *pcscreen, *currentscreen, *destscreen, *destview;
+//byte *pcscreen, *destscreen, *destview;
+byte *pcscreen, *currentscreen, *destscreen, *destview;  // 2024/10/26 copied from Doom Vanille
+
 
 /*
-===================
+==============
 =
-= I_UpdateBox
+= I_Update
 =
-===================
+==============
 */
+/*
+void I_Update (void)
+{
+//
+// blit screen to video
+//
+  memcpy(pcscreen, screens[0], SCREENHEIGHT*SCREENWIDTH);
+}*/
 
-#define PLANEWIDTH	80
+// 2024/10/26 copied from Doom Vanille
 
+//
+// I_UpdateBox
+//
 void I_UpdateBox(int x, int y, int w, int h)
 {
     int i, j, k, count;
@@ -1049,14 +1061,9 @@ void I_UpdateBox(int x, int y, int w, int h)
     }
 }
 
-/*
-===================
-=
-= I_UpdateNoBlit
-=
-===================
-*/
-
+//
+// I_UpdateNoBlit
+//
 int olddb[2][4];
 void I_UpdateNoBlit(void)
 {
@@ -1123,15 +1130,10 @@ void I_UpdateNoBlit(void)
     M_ClearBox(dirtybox);
 }
 
-/*
-===================
-=
-= I_FinishUpdate
-=
-===================
-*/
-
-void I_FinishUpdate (void)
+//
+// I_FinishUpdate
+//
+void I_FinishUpdate(void)
 {
     static int lasttic;
     int tics;
@@ -1162,21 +1164,20 @@ void I_FinishUpdate (void)
     }
 }
 
-/*
-===================
-=
-= I_InitGraphics
-=
-===================
-*/
 
-void I_InitGraphics (void)
+//--------------------------------------------------------------------------
+//
+// PROC I_InitGraphics
+//
+//--------------------------------------------------------------------------
+
+void I_InitGraphics(void)  // 2024/10/26 copied from Doom Vanille
 {
     if (novideo)
     {
         return;
     }
-//    grmode = true; // FS: Now in CFG
+//  grmode = true; // FS: Now in CFG
     regs.w.ax = 0x13;
     int386(0x10, (union REGS *)&regs, &regs);
     pcscreen = currentscreen = (byte *)0xa0000;
@@ -1196,38 +1197,52 @@ void I_InitGraphics (void)
     outp(CRTC_INDEX + 1, inp(CRTC_INDEX + 1) | 0x40);
     outp(GC_INDEX, GC_READMAP);
 
-	I_SetPalette(W_CacheLumpName(DEH_String("PLAYPAL"), PU_CACHE));
+    I_SetPalette(W_CacheLumpName("PLAYPAL", PU_CACHE));
     I_InitDiskFlash();
 }
-
 /*
-===================
-=
-= I_ShutdownGraphics
-=
-===================
-*/
-
-void I_ShutdownGraphics (void)
 {
-    if (*(byte *)0x449 == 0x13) // don't reset mode if it didn't get set
-    {
-        regs.w.ax = 3;
-        int386(0x10, &regs, &regs); // back to text mode
-    }
+//	grmode = 1; // FS: Now in CFG
+	regs.w.ax = 0x13;
+	int386(0x10, &regs, &regs);//(const union REGS *)&regs, &regs); // FS: Compiler Warning?
+	pcscreen = destscreen = (byte *)0xa0000;
+	I_SetPalette(W_CacheLumpName(DEH_String("PLAYPAL"), PU_CACHE));
+	I_InitDiskFlash();
+}*/
+
+//--------------------------------------------------------------------------
+//
+// PROC I_ShutdownGraphics
+//
+//--------------------------------------------------------------------------
+
+void I_ShutdownGraphics(void)
+{
+	int	i;
+	extern spritedef_t*	sprites;
+	
+	dprintf("I_ShutdownGraphics()\n"); // FS: DEBUG
+	Z_Free(saved_background);
+	Z_Free(disk_image);
+	Z_Free(flattranslation);
+	Z_Free(sprites);
+	
+	if(*(byte *)0x449 == 0x13) // don't reset mode if it didn't get set
+	{
+		regs.w.ax = 3;
+		int386(0x10, &regs, &regs); // back to text mode
+	}
 }
 
-/*
-===================
-=
-= I_ReadScreen
-=
-= Reads the screen currently displayed into a linear buffer.
-=
-===================
-*/
+//--------------------------------------------------------------------------
+//
+// PROC I_ReadScreen
+//
+// Reads the screen currently displayed into a linear buffer.
+//
+//--------------------------------------------------------------------------
 
-void I_ReadScreen (byte *scr)
+void I_ReadScreen(byte *scr)  // 2024/10/26 copied from Doom Vanille
 {
 	int i;
 	int j;
@@ -1243,6 +1258,11 @@ void I_ReadScreen (byte *scr)
 		}
 	}
 }
+
+/*
+{
+        memcpy(scr, screens[0], SCREENWIDTH*SCREENHEIGHT);
+}*/
 
 
 //===========================================================================
@@ -1260,8 +1280,11 @@ void I_ReadScreen (byte *scr)
 ===================
 */
 
-/*
- OLD STARTTIC STUFF
+
+#define SC_UPARROW              0x48
+#define SC_DOWNARROW    0x50
+#define SC_LEFTARROW            0x4b
+#define SC_RIGHTARROW   0x4d
 
 void   I_StartTic (void)
 {
@@ -1277,19 +1300,15 @@ void   I_StartTic (void)
 	while (kbdtail < kbdhead)
 	{
 		k = keyboardque[kbdtail&(KBDQUESIZE-1)];
-
-//      if (k==14)
-//              I_Error ("exited");
-
 		kbdtail++;
 
 		// extended keyboard shift key bullshit
-		if ( (k&0x7f)==KEY_RSHIFT )
+		if ( (k&0x7f)==SC_LSHIFT || (k&0x7f)==SC_RSHIFT )
 		{
 			if ( keyboardque[(kbdtail-2)&(KBDQUESIZE-1)]==0xe0 )
 				continue;
 			k &= 0x80;
-			k |= KEY_RSHIFT;
+			k |= SC_RSHIFT;
 		}
 
 		if (k==0xe0)
@@ -1310,105 +1329,47 @@ void   I_StartTic (void)
 		else
 			ev.type = ev_keydown;
 		k &= 0x7f;
-
-		ev.data1 = k;
-		//ev.data1 = scantokey[k];
-
+		switch (k)
+		{
+		case SC_UPARROW:
+			ev.data1 = KEY_UPARROW;
+			break;
+		case SC_DOWNARROW:
+			ev.data1 = KEY_DOWNARROW;
+			break;
+		case SC_LEFTARROW:
+			ev.data1 = KEY_LEFTARROW;
+			break;
+		case SC_RIGHTARROW:
+			ev.data1 = KEY_RIGHTARROW;
+			break;
+		default:
+			ev.data1 = scantokey[k];
+			break;
+		}
 		D_PostEvent (&ev);
 	}
-}
-*/
 
-#define SC_UPARROW              0x48
-#define SC_DOWNARROW    0x50
-#define SC_LEFTARROW            0x4b
-#define SC_RIGHTARROW   0x4d
-
-void   I_StartTic (void)
-{
-    int k;
-    event_t ev;
-
-    I_ReadMouse();
-
-    //
-    // keyboard events
-    //
-    while (kbdtail < kbdhead)
-    {
-        k = keyboardque[kbdtail&(KBDQUESIZE - 1)];
-        kbdtail++;
-
-        // extended keyboard shift key bullshit
-        if ((k & 0x7f) == SC_LSHIFT || (k & 0x7f) == SC_RSHIFT)
-        {
-            if (keyboardque[(kbdtail - 2)&(KBDQUESIZE - 1)] == 0xe0)
-            {
-                continue;
-            }
-            k &= 0x80;
-            k |= SC_RSHIFT;
-        }
-
-        if (k == 0xe0)
-        {
-            continue;   // special / pause keys
-        }
-        if (keyboardque[(kbdtail - 2)&(KBDQUESIZE - 1)] == 0xe1)
-        {
-            continue;   // pause key bullshit
-        }
-        if (k == 0xc5 && keyboardque[(kbdtail - 2)&(KBDQUESIZE - 1)] == 0x9d)
-        {
-            ev.type = ev_keydown;
-            ev.data1 = KEY_PAUSE;
-            D_PostEvent(&ev);
-            continue;
-        }
-
-        if (k & 0x80)
-            ev.type = ev_keyup;
-        else
-            ev.type = ev_keydown;
-        k &= 0x7f;
-        switch (k)
-        {
-        case SC_UPARROW:
-            ev.data1 = KEY_UPARROW;
-            break;
-        case SC_DOWNARROW:
-            ev.data1 = KEY_DOWNARROW;
-            break;
-        case SC_LEFTARROW:
-            ev.data1 = KEY_LEFTARROW;
-            break;
-        case SC_RIGHTARROW:
-            ev.data1 = KEY_RIGHTARROW;
-            break;
-        default:
-            ev.data1 = scantokey[k];
-            break;
-        }
-        D_PostEvent(&ev);
-    }
 }
 
 
 void   I_ReadKeys (void)
 {
-    int k;
+	int             k;
+	event_t ev;
 
-    while (1)
-    {
-        while (kbdtail < kbdhead)
-        {
-            k = keyboardque[kbdtail&(KBDQUESIZE - 1)];
-            kbdtail++;
-            printf("0x%x\n", k);
-            if (k == 1)
-                I_Quit();
-        }
-    }
+
+	while (1)
+	{
+	   while (kbdtail < kbdhead)
+	   {
+		   k = keyboardque[kbdtail&(KBDQUESIZE-1)];
+		   kbdtail++;
+		   printf ("0x%x\n",k);
+		   if (k == 1)
+			   I_Quit ();
+	   }
+	}
 }
 
 /*
@@ -2167,87 +2128,143 @@ void I_InitDiskFlash (void)
 }
 
 // draw disk icon
+// 2024/10/26 copied from Doom Vanille
+void I_BeginRead(void)
+{
+    byte *src, *dest;
+    int y;
+
+    if (!grmode || disk_image == NULL)  // 2024/10/26 from DoomNew code
+    {
+        return;
+    }
+
+    // write through all planes
+    outp(SC_INDEX, SC_MAPMASK);
+    outp(SC_INDEX + 1, 15);
+    // set write mode 1
+    outp(GC_INDEX, GC_MODE);
+    outp(GC_INDEX + 1, inp(GC_INDEX + 1) | 1);
+
+    // copy to backup
+    src = currentscreen + 184 * 80 + 304 / 4;
+    dest = (byte *)0xac000 + 184 * 80 + 288 / 4;
+    for (y = 0; y<16; y++)
+    {
+        dest[0] = src[0];
+        dest[1] = src[1];
+        dest[2] = src[2];
+        dest[3] = src[3];
+        src += 80;
+        dest += 80;
+    }
+
+    // copy disk over
+    dest = currentscreen + 184 * 80 + 304 / 4;
+    src = (byte *)0xac000 + 184 * 80 + 304 / 4;
+    for (y = 0; y<16; y++)
+    {
+        dest[0] = src[0];
+        dest[1] = src[1];
+        dest[2] = src[2];
+        dest[3] = src[3];
+        src += 80;
+        dest += 80;
+    }
+
+
+    // set write mode 0
+    outp(GC_INDEX, GC_MODE);
+    outp(GC_INDEX + 1, inp(GC_INDEX + 1)&~1);
+}
+
+// erase disk icon
+void I_EndRead(void)
+{
+    byte *src, *dest;
+    int y;
+
+    if (!grmode || disk_image == NULL)  // 2024/10/26 from DoomNew code
+    {
+        return;
+    }
+
+    // write through all planes
+    outp(SC_INDEX, SC_MAPMASK);
+    outp(SC_INDEX + 1, 15);
+    // set write mode 1
+    outp(GC_INDEX, GC_MODE);
+    outp(GC_INDEX + 1, inp(GC_INDEX + 1) | 1);
+
+
+    // copy disk over
+    dest = currentscreen + 184 * 80 + 304 / 4;
+    src = (byte *)0xac000 + 184 * 80 + 288 / 4;
+    for (y = 0; y<16; y++)
+    {
+        dest[0] = src[0];
+        dest[1] = src[1];
+        dest[2] = src[2];
+        dest[3] = src[3];
+        src += 80;
+        dest += 80;
+    }
+
+    // set write mode 0
+    outp(GC_INDEX, GC_MODE);
+    outp(GC_INDEX + 1, inp(GC_INDEX + 1)&~1);
+}
+
+/*
 void I_BeginRead (void)
 {
-	byte    *src,*dest;
-	int             y;
+    byte *screenloc = screens[0]
+                    + (SCREENHEIGHT - LOADING_DISK_H) * SCREENWIDTH
+                    + (SCREENWIDTH - LOADING_DISK_W);
+    int y;
 
-	if (!grmode)
-		return;
+    if (!grmode || disk_image == NULL)
+        return;
 
-// write through all planes
-	outp (SC_INDEX,SC_MAPMASK);
-	outp (SC_INDEX+1,15);
-// set write mode 1
-	outp (GC_INDEX,GC_MODE);
-	outp (GC_INDEX+1,inp(GC_INDEX+1)|1);
+    // save background and copy the disk image in
 
-// copy to backup
-	src = currentscreen + 184*80 + 304/4;
-	dest = (byte *)0xac000 + 184*80 + 288/4;
-	for (y=0 ; y<16 ; y++)
-	{
-		dest[0] = src[0];
-		dest[1] = src[1];
-		dest[2] = src[2];
-		dest[3] = src[3];
-		src += 80;
-		dest += 80;
-	}
+    for (y=0; y<LOADING_DISK_H; ++y)
+    {
+        memcpy(saved_background + y * LOADING_DISK_W,
+               screenloc,
+               LOADING_DISK_W);
+        memcpy(screenloc,
+               disk_image + y * LOADING_DISK_W,
+               LOADING_DISK_W);
 
-// copy disk over
-	dest = currentscreen + 184*80 + 304/4;
-	src = (byte *)0xac000 + 184*80 + 304/4;
-	for (y=0 ; y<16 ; y++)
-	{
-		dest[0] = src[0];
-		dest[1] = src[1];
-		dest[2] = src[2];
-		dest[3] = src[3];
-		src += 80;
-		dest += 80;
-	}
-
-
-// set write mode 0
-	outp (GC_INDEX,GC_MODE);
-	outp (GC_INDEX+1,inp(GC_INDEX+1)&~1);
+        screenloc += SCREENWIDTH;
+    }
+	I_Update();
 }
 
 // erase disk icon
 void I_EndRead (void)
 {
-	byte    *src,*dest;
-	int             y;
+    byte *screenloc = screens[0]
+                    + (SCREENHEIGHT - LOADING_DISK_H) * SCREENWIDTH
+                    + (SCREENWIDTH - LOADING_DISK_W);
+    int y;
 
-	if (!grmode)
-		return;
+    if (!grmode || disk_image == NULL)
+        return;
 
-// write through all planes
-	outp (SC_INDEX,SC_MAPMASK);
-	outp (SC_INDEX+1,15);
-// set write mode 1
-	outp (GC_INDEX,GC_MODE);
-	outp (GC_INDEX+1,inp(GC_INDEX+1)|1);
+    // save background and copy the disk image in
 
+    for (y=0; y<LOADING_DISK_H; ++y)
+    {
+        memcpy(screenloc,
+               saved_background + y * LOADING_DISK_W,
+               LOADING_DISK_W);
 
-// copy disk over
-	dest = currentscreen + 184*80 + 304/4;
-	src = (byte *)0xac000 + 184*80 + 288/4;
-	for (y=0 ; y<16 ; y++)
-	{
-		dest[0] = src[0];
-		dest[1] = src[1];
-		dest[2] = src[2];
-		dest[3] = src[3];
-		src += 80;
-		dest += 80;
-	}
-
-// set write mode 0
-	outp (GC_INDEX,GC_MODE);
-	outp (GC_INDEX+1,inp(GC_INDEX+1)&~1);
-}
+        screenloc += SCREENWIDTH;
+    }
+	I_Update();
+}*/
 
 
 
