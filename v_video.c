@@ -1,26 +1,8 @@
-//
-// Copyright (C) 1993-1996 Id Software, Inc.
-// Copyright (C) 2016-2017 Alexey Khokholov (Nuke.YKT)
-// Copyright (C) 2017 Alexandre-Xavier Labonté-Lamoureux
-//
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// DESCRIPTION:
-//	Gamma correction LUT stuff.
-//	Functions to draw patches (by post) directly to screen.
-//	Functions to blit a block to the screen.
-//
+// V_Video.c:	Gamma correction LUT stuff. 
+// 				Functions to draw patches (by post) directly to screen.
+//				Functions to blit a block to the screen.
 
 
-#include <conio.h>
 #include "i_system.h"
 #include "r_local.h"
 
@@ -30,20 +12,18 @@
 #include "m_bbox.h"
 #include "m_swap.h"
 
-#include "m_misc.h"
-
 #include "v_video.h"
 
 
 // Each screen is [SCREENWIDTH*SCREENHEIGHT]; 
-byte*				screens[5];	
+byte*	screens[5];	
  
-int				dirtybox[4]; 
+int		dirtybox[4]; 
 
 
 
 // Now where did these came from?
-byte gammatable[5][256] =
+byte	gammatable[5][256] =
 {
     {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,
      17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,
@@ -127,56 +107,28 @@ byte gammatable[5][256] =
      251,252,252,253,254,254,255,255}
 };
 
- 
-#define SC_INDEX                0x3C4
-#define SC_RESET                0
-#define SC_CLOCK                1
-#define SC_MAPMASK              2
-#define SC_CHARMAP              3
-#define SC_MEMMODE              4
+// 2024/10/26 copied from gamesrc-ver-recreation
+#define SC_INDEX			0x3c4
 
-#define GC_INDEX                0x3CE
-#define GC_SETRESET             0
-#define GC_ENABLESETRESET 1
-#define GC_COLORCOMPARE 2
-#define GC_DATAROTATE   3
-#define GC_READMAP              4
-#define GC_MODE                 5
-#define GC_MISCELLANEOUS 6
-#define GC_COLORDONTCARE 7
-#define GC_BITMASK              8
+
 
 int	usegamma;
 			 
 //
 // V_MarkRect 
 // 
-void
-V_MarkRect
-( int		x,
-  int		y,
-  int		width,
-  int		height ) 
-{ 
-    M_AddToBox (dirtybox, x, y); 
-    M_AddToBox (dirtybox, x+width-1, y+height-1); 
+void V_MarkRect (int x, int y, int width, int height) 
+{
+	M_AddToBox (dirtybox, x, y); 
+	M_AddToBox (dirtybox, x+width-1, y+height-1); 
 } 
  
 
 //
 // V_CopyRect 
 // 
-void
-V_CopyRect
-( int		srcx,
-  int		srcy,
-  int		srcscrn,
-  int		width,
-  int		height,
-  int		destx,
-  int		desty,
-  int		destscrn ) 
-{ 
+void V_CopyRect (int srcx, int srcy, int srcscrn, int width, int height, int destx, int desty, int destscrn) 
+{
     byte*	src;
     byte*	dest; 
 	 
@@ -352,6 +304,11 @@ V_DrawPatchDirect
   int		scrn,
   patch_t*	patch ) 
 {
+#ifndef __WATCOMC__  // 2024/10/26 condition from gamesrc-ver-recreation
+    V_DrawPatch (x,y,scrn, patch);
+#else
+
+    // 2024/10/26 uncommment original code
     int		count;
     int		col; 
     column_t*	column; 
@@ -401,7 +358,8 @@ V_DrawPatchDirect
 	} 
 	if ( ((++x)&3) == 0 ) 
 	    desttop++;	// go to next byte, not next plane 
-    }
+    } 
+#endif
 } 
  
 
@@ -490,13 +448,13 @@ V_GetBlock
 // 
 void V_Init (void) 
 { 
-    int		i;
-    byte*	base;
+	int		i;
+	byte*	base;
 		
     // stick these in low dos memory on PCs
 
-    base = I_AllocLow (SCREENWIDTH*SCREENHEIGHT*4);
+	base = I_AllocLow (SCREENWIDTH*SCREENHEIGHT*4);
 
-    for (i=0 ; i<4 ; i++)
-	screens[i] = base + i*SCREENWIDTH*SCREENHEIGHT;
+	for (i=0 ; i<4 ; i++)
+		screens[i] = base + i*SCREENWIDTH*SCREENHEIGHT;
 }
