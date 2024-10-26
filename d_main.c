@@ -267,7 +267,7 @@ void D_Display (void)
 	}
 	
 	// draw buffered stuff to screen
-//	I_UpdateNoBlit (); // FS: Not needed.
+	I_UpdateNoBlit (); // FS: Not needed. // 2024/09/21 restore function
 	
 	// draw the view directly
 	if (gamestate == GS_LEVEL && !automapactive && gametic)
@@ -323,9 +323,10 @@ void D_Display (void)
 	// normal update
 	if (!wipe)
 	{
-		if (fullscreen) // FS: Full screen new school
+		I_FinishUpdate ();              // page flip or blit buffer  // 2024/09/21 from gamesrc-ver-recreation
+		/*if (fullscreen) // FS: Full screen new school
 			ST_Drawer (viewheight == 200, redrawsbar );
-		I_Update ();			  // page flip or blit buffer
+		I_Update ();			  // page flip or blit buffer*/
 		return;
 	}
 
@@ -346,9 +347,10 @@ void D_Display (void)
 			while (!tics);
 			wipestart = nowtime;
 			done = wipe_ScreenWipe(wipe_Melt, 0, 0, SCREENWIDTH, SCREENHEIGHT, tics);
-			//I_UpdateNoBlit ();	// FS: Not needed.
+			I_UpdateNoBlit ();	// FS: Not needed. // 2024/09/21 restore
 			M_Drawer ();							// menu is drawn even on top of wipes
-			I_Update ();					  // page flip or blit buffer
+		    I_FinishUpdate ();                      // page flip or blit buffer // 2024/09/21 from gamesrc-ver-recreation
+//			I_Update ();					  // page flip or blit buffer
 		}
 		while (!done);
 	}
@@ -1106,11 +1108,7 @@ void D_DoomMain (void)
 	if (M_CheckParm("-cdrom"))
 	{
 		printf(D_CDROM);
-#ifdef __WATCOMC__
-		mkdir("c:\\doomdata");
-#else
 		mkdir("c:\\doomdata",0);
-#endif
 		strcpy (basedefault,"c:/doomdata/default.cfg");
 	}
 
