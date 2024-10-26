@@ -3,7 +3,7 @@
 This is a vanillified fork of <a href="https://doomwiki.org/wiki/DoomNew">DoomNew</a>, a DOS <i>Doom</i> source port with built-in DeHackEd support and other extra features.
 
 What's changed in this version:
-<ul><li>restored original <i>Doom</i> planar mode (imported from <a href="https://doomwiki.org/wiki/Gamesrc-ver-recreation">gamesrc-ver-recreation</a></li>
+<ul><li>restored original <i>Doom</i> planar mode (imported from <a href="https://github.com/AXDOOMER/doom-vanille">Doom Vanille</a> and <a href="https://doomwiki.org/wiki/Gamesrc-ver-recreation">gamesrc-ver-recreation</a>)</li>
 <li>reset static vanilla limits</li>
 <li>restored original player movement speed</li></ul>
 
