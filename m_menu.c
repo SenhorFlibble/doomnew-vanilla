@@ -1117,22 +1117,22 @@ void M_ChangeSensitivity(int choice)
 
 
 
-void M_ChangeDetail(int choice)
+void M_ChangeDetail(int choice)  // 2024/09/21 restore low detail mode
 {
-//    choice = 0;
-//    detailLevel = 1 - detailLevel;
-	detailLevel = 0;
+    choice = 0;
+    detailLevel = 1 - detailLevel;
+//	detailLevel = 0;
 	// FS: FIXME - moron fucked this up too...
-	HU_SetMessage(&players[consoleplayer], "low detail mode disabled in this build!",true);
+//	HU_SetMessage(&players[consoleplayer], "low detail mode disabled in this build!",true);
 
-	return;
+//	return;
 
-	/*R_SetViewSize (screenblocks, detailLevel);
+	R_SetViewSize (screenblocks, detailLevel);
 
 	if (!detailLevel)
 		players[consoleplayer].message = DEH_String(DETAILHI);
 	else
-		players[consoleplayer].message = DEH_String(DETAILLO);*/
+		players[consoleplayer].message = DEH_String(DETAILLO);
 }
 
 void M_ChangePalFlashes(int choice) // FS: Palette Flashes Toggle
@@ -1538,8 +1538,8 @@ boolean M_Responder (event_t* ev)
 				return true;
 				
 			case KEY_F5:            // FS: Change Palette Flashing  was // Detail toggle
-				// M_ChangeDetail(0);
-				M_ChangePalFlashes(0);
+				M_ChangeDetail(0);  // 2024/09/21 restore original
+//				M_ChangePalFlashes(0);
 				S_StartSound(NULL,sfx_swtchn);
 				return true;
 				
