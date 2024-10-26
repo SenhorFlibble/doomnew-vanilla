@@ -1,7 +1,11 @@
+// Emacs style mode select   -*- C++ -*- 
+//-----------------------------------------------------------------------------
 //
-// Copyright (C) 1993-1996 Id Software, Inc.
+// $Id:$
+//
+// Copyright (C) 1993-1996 by id Software, Inc.
+// Copyright (C) 2012-2015 Frank Sapone (Maraakate)
 // Copyright (C) 2016-2017 Alexey Khokholov (Nuke.YKT)
-// Copyright (C) 2017 Alexandre-Xavier Labonté-Lamoureux
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -16,6 +20,7 @@
 // DESCRIPTION:
 //	Rendering of moving objects, sprites.
 //
+//-----------------------------------------------------------------------------
 
 
 #ifndef __R_THINGS__
@@ -26,7 +31,7 @@
 #pragma interface
 #endif
 
-#define MAXVISSPRITES  	128
+#define MAXVISSPRITES  	128 // 2024/10/26: restored from 1024 // FS: Was 128
 
 extern vissprite_t	vissprites[MAXVISSPRITES];
 extern vissprite_t*	vissprite_p;
@@ -67,3 +72,8 @@ R_ClipVisSprite
 
 
 #endif
+//-----------------------------------------------------------------------------
+//
+// $Log:$
+//
+//-----------------------------------------------------------------------------
