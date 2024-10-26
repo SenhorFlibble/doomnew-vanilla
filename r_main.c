@@ -1,7 +1,11 @@
+// Emacs style mode select   -*- C++ -*- 
+//-----------------------------------------------------------------------------
 //
-// Copyright (C) 1993-1996 Id Software, Inc.
+// $Id:$
+//
+// Copyright (C) 1993-1996 by id Software, Inc.
+// Copyright (C) 2012-2015 Frank Sapone (Maraakate)
 // Copyright (C) 2016-2017 Alexey Khokholov (Nuke.YKT)
-// Copyright (C) 2017 Alexandre-Xavier Labonté-Lamoureux
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -13,24 +17,28 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
+// $Log:$
+//
 // DESCRIPTION:
 //	Rendering main loop and setup functions,
 //	 utility functions (BSP, geometry, trigonometry).
 //	See tables.c, too.
 //
+//-----------------------------------------------------------------------------
+
+
+static const char rcsid[] = "$Id: r_main.c,v 1.5 1997/02/03 22:45:12 b1 Exp $";
 
 
 
 #include <stdlib.h>
-#include <math.h>
-
 
 #include "doomdef.h"
 #include "d_net.h"
 
 #include "m_bbox.h"
 
-#include "m_misc.h"
+#include "m_misc.h"  // 2024/10/26 copied from Doom Vanille
 
 #include "r_local.h"
 #include "r_sky.h"
@@ -268,6 +276,7 @@ R_PointOnSegSide
     return 1;			
 }
 
+// 2024/10/26 copied from Doom Vanille
 int
 SlopeDiv
 ( unsigned	num,
@@ -788,7 +797,6 @@ void R_Init (void)
     R_InitTables ();
     // viewwidth / viewheight / detailLevel are set by the defaults
     printf (".");
-
     R_SetViewSize (screenblocks, detailLevel);
     R_InitPlanes ();
     printf (".");
@@ -868,7 +876,7 @@ void R_SetupFrame (player_t* player)
 		
     framecount++;
     validcount++;
-    destview = destscreen + (viewwindowy*SCREENWIDTH/4) + (viewwindowx >> 2);
+    destview = destscreen + (viewwindowy*SCREENWIDTH/4) + (viewwindowx >> 2);  // 2024/10/26 copied from Doom Vanille
 }
 
 
