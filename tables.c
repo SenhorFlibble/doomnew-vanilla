@@ -4,15 +4,18 @@
 // $Id:$
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
+// Copyright (C) 2012-2015 Frank Sapone (Maraakate)
+// Copyright (C) 2016-2017 Alexey Khokholov (Nuke.YKT)
 //
-// This source is available for distribution and/or modification
-// only under the terms of the DOOM Source Code License as
-// published by id Software. All rights reserved.
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
 //
-// The source is distributed in the hope that it will be useful,
+// This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// FITNESS FOR A PARTICULAR PURPOSE. See the DOOM Source Code License
-// for more details.
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
 //
 // $Log:$
 //
@@ -44,8 +47,8 @@ rcsid[] = "$Id: tables.c,v 1.4 1997/02/03 16:47:57 b1 Exp $";
 #include "tables.h"
 
 
-
-
+// 2024/10/26 moved to r_main.c, as in Doom Vanille
+/*
 int
 SlopeDiv
 ( unsigned	num,
@@ -59,7 +62,7 @@ SlopeDiv
     ans = (num<<3)/(den>>8);
 
     return ans <= SLOPERANGE ? ans : SLOPERANGE;
-}
+}*/
 
 
 
