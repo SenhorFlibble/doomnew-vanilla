@@ -929,7 +929,8 @@ void M_DrawOptions(void)
 		       W_CacheLumpName(DEH_String(msgNames[showMessages]),PU_CACHE));
 
     M_DrawThermo(OptionsDef.x,OptionsDef.y+LINEHEIGHT*(mousesens+1),
-		 10,mouseSensitivity/5); // FS: Go up to 5 now
+		 10,mouseSensitivity);  // 2024/10/27 restored original values
+//		 10,mouseSensitivity/5); // FS: Go up to 5 now
 	
     M_DrawThermo(OptionsDef.x,OptionsDef.y+LINEHEIGHT*(scrnsize+1),
 		 9,screenSize);
@@ -1108,7 +1109,8 @@ void M_ChangeSensitivity(int choice)
 				mouseSensitivity--;
 			break;
 		case 1:
-			if (mouseSensitivity < 50) // FS: Go up to 50 now (from 9)
+	        if (mouseSensitivity < 9)  // 2024/10/27 restored original values
+//			if (mouseSensitivity < 50) // FS: Go up to 50 now (from 9)
 				mouseSensitivity++;
 			break;
 	}
