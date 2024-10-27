@@ -1,8 +1,10 @@
-10-25-24
- - Imported original planar mode code from Doom Vanille and
-   gamesrc-ver-recreation + restored low detail mode
+10-27-24
+ - Imported original planar mode code from gamesrc-ver-recreation and
+   Doom Vanille
+ - Restored low detail mode (F5)
  - Reset vanilla static limits
- - Restored original player movement speed
+ - Restored vanilla player movement speed, fixed run key
+ - Restored vanilla mouse sensitivity scale
 
 04-14-24
  - Fixed some typos and re-linked using the Apogee Sound System 
