@@ -45,30 +45,7 @@ FixedMul
 ( fixed_t	a,
   fixed_t	b )
 {
-//	OpenWatcom has long long but everything else doesnt
-//	file m_fixed.obj(m_fixed.c): undefined symbol __I8M
-//	file m_fixed.obj(m_fixed.c): undefined symbol __I8RS
-//#if __WATCOMC__ > 1200
-//    return ((long long) a * (long long) b) >> FRACBITS;
-//#else
-    unsigned int ah,al,bh,bl,result;
-
-    ah = (a >> FRACBITS);
-    al = (a & (FRACUNIT-1));
-    bh = (b >> FRACBITS);
-    bl = (b & (FRACUNIT-1));
-
-    // Multiply the parts separately
-    result = (ah * bh) << FRACBITS; // High*High
-    result += ah * bl;                   // High*Low
-    result += al * bh;                   // Low*High
-    // Low*Low part doesn't need to be calculated because it doesn't contribute to the result after shifting
-
-    // Shift right by FRACBITS to get the fixed-point result
-    result += (al * bl) >> FRACBITS;
-
-    return (fixed_t)result;
-//#endif
+    return ((long long) a * (long long) b) >> FRACBITS;
 }
 
 

@@ -478,14 +478,7 @@ void DEH_snprintf(char *buffer, size_t len, char *fmt, ...)
 
     va_start(args, fmt);
 
-//  OpenWatcom has this but other watcoms dont
-//	2.0 doesnt?
-//	undefined symbol _vsnprintf_
-//#if __WATCOMC__ > 1200
-//    vsnprintf(buffer, len, repl, args);
-//#else
-    vsprintf(buffer, repl, args);
-//#endif
+    vsnprintf(buffer, len, repl, args);
 
     va_end(args);
 }
