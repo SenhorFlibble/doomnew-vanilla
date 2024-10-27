@@ -2091,13 +2091,15 @@ byte *I_ZoneBase (int *size)
 =============================================================================
 */
 
+// 2024/10/27 merged from Doom Vanille
 void I_InitDiskFlash (void)
 {
-    patch_t *disk;
+    void *disk;
+    byte *temp;
     char *disk_name;
-    int y;
+/*    int y;
     int xoffset = SCREENWIDTH - LOADING_DISK_W;
-    int yoffset = SCREENHEIGHT - LOADING_DISK_H;
+    int yoffset = SCREENHEIGHT - LOADING_DISK_H;*/
     char buf[20];
 
     if (M_CheckParm("-cdrom") > 0)
@@ -2105,25 +2107,30 @@ void I_InitDiskFlash (void)
     else
         disk_name = DEH_String("STDISK");
 
-    disk = W_CacheLumpName(disk_name, PU_STATIC);
+    disk = W_CacheLumpName(disk_name, PU_CACHE);
 
     // Draw the disk to the screen:
 
-    V_DrawPatch(SCREENWIDTH - LOADING_DISK_W,
+    temp = destscreen;
+    destscreen = (byte *)0xac000;
+    V_DrawPatchDirect(SCREENWIDTH - LOADING_DISK_W, SCREENHEIGHT - LOADING_DISK_H, 0, disk);
+    destscreen = temp;
+	
+/*    V_DrawPatch(SCREENWIDTH - LOADING_DISK_W,
                 SCREENHEIGHT - LOADING_DISK_H,
-                0, disk);
+                0, disk);*/
 
     disk_image = Z_Malloc(LOADING_DISK_W * LOADING_DISK_H, PU_STATIC, NULL);
     saved_background = Z_Malloc(LOADING_DISK_W * LOADING_DISK_H, PU_STATIC, NULL);
 
-    for (y=0; y<LOADING_DISK_H; ++y) 
+    /*for (y=0; y<LOADING_DISK_H; ++y) 
     {
         memcpy(disk_image + LOADING_DISK_W * y,
                screens[0] + SCREENWIDTH * (y + yoffset) + xoffset,
                LOADING_DISK_W);
     }
 
-    Z_ChangeTag(disk, PU_CACHE);
+    Z_ChangeTag(disk, PU_CACHE);*/
 
 }
 
