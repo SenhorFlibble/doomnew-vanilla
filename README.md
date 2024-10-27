@@ -17,7 +17,7 @@ Note that even though this version can still run <a href="http://drnostromo.com/
 
 I compiled this using the freeware Watcom C 11.0c available <a href="https://www.openwatcom.org/ftp/archive/11.0c/">here</a>. (Full disclosure: I first installed Open Watcom C 1.9 in DOSBox, then installed Watcom C 11.0c elsewhere and copied those files over the Open Watcom ones, overwriting them.) Compiling with Open Watcom C might work, but will likely throw up a bunch of warnings. You will also need Borland Turbo Assembler 3.1 to compile the Assembler parts of the code.
 
-<h3>Original project description</h3>
+<h3>What is DoomNew?</h3>
 
 DoomNew is a enhanced DOS source port created by Frank Sapone, otherwise known as Maraakate. It is derived from Linux Doom. It aims to enhance the stock executable with system drivers and bug fixes derived from Heretic and new features, including the use of the DMX sound engine, internal and external DeHackEd support and the raising of static limits, such as visplanes.
 
@@ -29,7 +29,7 @@ September 2013 was easily the most productive month for the port. On September 9
 
 2013 and 2014 were thus spent on fixing bugs, partially using code from his enhanced Heretic fork. After November 11, 2014, development stopped until August 31, 2015 when Sapone released a massive code clean up. Experimental support for the SimulEyes Virtual reality glasses was provided utilizing a secondary executable called DOOMVR.EXE. The last update and release was on October 21, 2015.
 
-<h3>Features</h3>
+<h3>Original DoomNew features</h3>
 <ul><li>Utilizes the DMX sound engine</li>
 <li>Support for Doom, The Ultimate Doom, Doom 2, TNT: Evilution, The Plutonia Experiment, Perdition's Gate, Hell to Pay, Chex Quest and HacX through their own parameters
 <br>-doom, -doomu, -doom2, -tnt, -plutonia, -perdgate, -hell2pay/-helltopay, -hacx</li>
