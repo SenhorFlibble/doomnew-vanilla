@@ -4,8 +4,10 @@ This is a vanillified fork of <a href="https://doomwiki.org/wiki/DoomNew">DoomNe
 
 What's changed in this version:
 <ul><li>restored original <i>Doom</i> planar mode (imported from <a href="https://github.com/AXDOOMER/doom-vanille">Doom Vanille</a> and <a href="https://doomwiki.org/wiki/Gamesrc-ver-recreation">gamesrc-ver-recreation</a>)</li>
+<li>restored low detail mode (F5)</li>
 <li>reset static vanilla limits</li>
-<li>restored original player movement speed</li></ul>
+<li>restored vanilla player movement speed</li>
+<li>restored vanilla mouse sensitivity scale</li></ul>
 
 This version is compiled with the APODMX wrapper and the Apogee Sound System instead of the proprietary DMX sound library, making it fully GPL-compliant.
 
@@ -13,7 +15,7 @@ Note that even though this version can still run <a href="http://drnostromo.com/
 
 <h3>Compiling</h3>
 
-I compiled this using the freeware Watcom C 11.0c available <a href="https://www.openwatcom.org/ftp/archive/11.0c/">here</a>. Compiling with Open Watcom C was not tested. You will also need Borland Turbo Assembler 3.1 to compile the Assembler parts of the code.
+I compiled this using the freeware Watcom C 11.0c available <a href="https://www.openwatcom.org/ftp/archive/11.0c/">here</a>. (Full disclosure: I first installed Open Watcom C 1.9 in DOSBox, then installed Watcom C 11.0c elsewhere and copied those files over the Open Watcom ones, overwriting them.) Compiling with Open Watcom C might work, but will likely throw up a bunch of warnings. You will also need Borland Turbo Assembler 3.1 to compile the Assembler parts of the code.
 
 <h3>Original project description</h3>
 
