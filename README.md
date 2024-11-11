@@ -6,8 +6,17 @@ What's changed in this version:
 <ul><li>restored original <i>Doom</i> planar mode (imported from <a href="https://github.com/AXDOOMER/doom-vanille">Doom Vanille</a> and <a href="https://doomwiki.org/wiki/Gamesrc-ver-recreation">gamesrc-ver-recreation</a>)</li>
 <li>restored low detail mode (F5)</li>
 <li>reset static vanilla limits</li>
-<li>restored vanilla player movement speed</li>
-<li>restored vanilla mouse sensitivity scale</li></ul>
+<li>restored vanilla mouse sensitivity scale</li>
+<li>additional DoomNew features are now optional (toggle in EXTEND.CFG):
+<br>+ always run
+<br>+ secret counter/HUD message
+<br>+ extra cheat codes & adding backpack with the ammo cheat</li>
+<li>optional Doom bug fixes (enable in EXTEND.CFG):
+<br>+ <a href="https://doomwiki.org/wiki/Ouch_face">ouch face bug</a>
+<br>+ <a href="https://doomwiki.org/wiki/Picked_up_a_medikit_that_you_REALLY_need!">"Picked up a medikit that you REALLY need!" message</a>
+<br>+ <a href="https://doomwiki.org/wiki/Sky_never_changes_in_Doom_II">never changing sky in Doom II</a>
+<br>+ <a href="https://doomwiki.org/wiki/Final_Doom_teleporters_do_not_set_Z_coordinate">Final Doom teleporter bug<a/> (from Doom Vanille)</li>
+<li>restored the <a href="https://doomwiki.org/wiki/Demo_desyncing_caused_by_bouncing_lost_souls">bouncing Lost Souls bug</a> for non-Ultimate/Final Doom versions (from Doom Vanille)</li></ul>
 
 This version is compiled with the APODMX wrapper and the Apogee Sound System instead of the proprietary DMX sound library, making it fully GPL-compliant.
 
