@@ -534,20 +534,40 @@ void P_TouchSpecialThing (mobj_t* special, mobj_t* toucher)
 		case SPR_MEDI:
 			if (!P_GiveBody (player, 25))
 				return;
-
-			if (player->health < 50)
+			
+			if(bugFix) // 2024/11/10 fix the message bug
 			{
-				if(chex)
-					player->message = "Picked up some needed vegetables!";
+				if (player->health < 50)
+				{
+					if(chex)
+						player->message = "Picked up some needed vegetables!";
+					else
+						player->message = DEH_String(GOTMEDINEED);
+				}
 				else
-					player->message = DEH_String(GOTMEDINEED);
+				{
+					if(chex)
+						player->message = "Picked up a bowl of vegetables.";
+					else
+						player->message = DEH_String(GOTMEDIKIT);
+				}
 			}
-			else
+			else // 2024/11/10 preserve original behaviour
 			{
-				if(chex)
-					player->message = "Picked up a bowl of vegetables.";
+				if (player->health < 25)
+				{
+					if(chex)
+						player->message = "Picked up some needed vegetables!";
+					else
+						player->message = DEH_String(GOTMEDINEED);
+				}
 				else
-					player->message = DEH_String(GOTMEDIKIT);
+				{
+					if(chex)
+						player->message = "Picked up a bowl of vegetables.";
+					else
+						player->message = DEH_String(GOTMEDIKIT);
+				}
 			}
 			break;
 

@@ -166,6 +166,10 @@ boolean noprecache;
 boolean noquitsound;
 boolean nowipe;
 boolean usePalFlash;
+boolean alwaysRun; // 2024/11/10
+boolean secretCount; // 2024/11/10
+boolean bugFix; // 2024/11/10
+boolean newCheats; // 2024/11/10
 /* FS: For custom weapon binds */
 boolean	use_wpnbinds;
 int	wpn_shotgun;
@@ -292,6 +296,10 @@ default_t	extendeddefaults[] =
 	{ "noprecache", &noprecache, 0}, // FS: No graphics precaching
 	{ "noquitsound", &noquitsound, 0}, // FS: No quit sound
 	{ "nowipe", &nowipe, 0}, // FS: No Wipes
+	{ "alwaysRun", &alwaysRun, 0}, // 2024/11/10
+	{ "secretCount", &secretCount, 0}, // 2024/11/10
+	{ "bugFix", &bugFix, 0}, // 2024/11/10
+	{ "newCheats", &newCheats, 0}, // 2024/11/10
 
 	// FS: Use custom weapon binds
 	{ "use_wpnbinds", &use_wpnbinds, 0},

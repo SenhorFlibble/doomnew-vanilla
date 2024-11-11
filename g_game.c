@@ -236,11 +236,11 @@ void G_BuildTiccmd (ticcmd_t* cmd)
     strafe = gamekeydown[key_strafe] || mousebuttons[mousebstrafe] || joybuttons[joybstrafe]; 
     speed = gamekeydown[key_speed] || joybuttons[joybspeed];
 
-	/*if (!demoplayback)  // 2024/09/21 commented out as this seems to break the speed up key
+	if (!demoplayback && alwaysRun)  // 2024/11/10 this only works with always run on
 	{
 		if (gamekeydown[key_speed] || joybuttons[joybspeed]) // FS: could cheat with ultrafast movement, from DOSDOOM.
 			speed = !speed;
-	}*/
+	}
 
     forward = side = 0;
    
@@ -463,6 +463,8 @@ void G_DoLoadLevel (void)
 
     // DOOM determines the sky texture to be used
     // depending on the current episode, and the game version.
+	if(bugFix) // 2024/11/10 include this in bugfixes
+	{
 	if ( (gamemode == commercial))
 	{
 		skytexture = R_TextureNumForName (DEH_String("SKY3"));
@@ -471,6 +473,7 @@ void G_DoLoadLevel (void)
 		else if (gamemap < 21)
 			skytexture = R_TextureNumForName (DEH_String("SKY2"));
 	}
+	} // 2024/11/10 end bugfix section
 
     levelstarttic = gametic;        // for time calculation
     

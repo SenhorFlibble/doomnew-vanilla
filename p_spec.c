@@ -1053,12 +1053,17 @@ void P_PlayerInSpecialSector (player_t* player)
 	// SECRET SECTOR
 	player->secretcount++;
 	sector->special = 0;
-	HU_SetMessage(player,"YOU FOUND A SECRET AREA!",true); // FS: Alert me about a secret area
+	
+	if(secretCount)  // 2024/11/10 only if enabled in EXTEND.CFG
+	{
+		HU_SetMessage(player,"YOU FOUND A SECRET AREA!",true); // FS: Alert me about a secret area
 
-	if ( gamemode == commercial ) // FS: Play a sound for secrets
+		if ( gamemode == commercial ) // FS: Play a sound for secrets
 		S_StartSound(0, sfx_radio);
-	else
+		else
 		S_StartSound(0, sfx_tink);
+	}
+	
 	break;
 			
       case 11:

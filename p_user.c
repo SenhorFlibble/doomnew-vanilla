@@ -135,29 +135,35 @@ void P_MovePlayer (player_t* player)
 	//  if not onground.
 	onground = (player->mo->z <= player->mo->floorz);
 	
-    if (cmd->forwardmove && onground)
-	P_Thrust (player, player->mo->angle, cmd->forwardmove*2048);
-    
-    if (cmd->sidemove && onground)
-	P_Thrust (player, player->mo->angle-ANG90, cmd->sidemove*2048);
-
-	/*if(demoplayback) // FS: Was desyncing demos
+	if(alwaysRun) // 2024/11/10 always run now optional
 	{
-		if (cmd->forwardmove && onground)
-			P_Thrust (player, player->mo->angle, cmd->forwardmove*2048);
+	    if(demoplayback) // FS: Was desyncing demos
+	    {
+		    if (cmd->forwardmove && onground)
+			    P_Thrust (player, player->mo->angle, cmd->forwardmove*2048);
 	
-		if (cmd->sidemove && onground)
-			P_Thrust (player, player->mo->angle-ANG90, cmd->sidemove*2048);
+		    if (cmd->sidemove && onground)
+			    P_Thrust (player, player->mo->angle-ANG90, cmd->sidemove*2048);
+	    }
+
+	    else
+	    {
+		    if (cmd->forwardmove && onground)
+			    P_Thrust (player, player->mo->angle, cmd->forwardmove*2048*2); // FS: Was 2048
+	
+		    if (cmd->sidemove && onground)
+			    P_Thrust (player, player->mo->angle-ANG90, cmd->sidemove*2048*2); // FS: Was 2048
+	    }
 	}
-
-	else
+	
+	else // 2024/11/10 original movement speed code
 	{
 		if (cmd->forwardmove && onground)
-			P_Thrust (player, player->mo->angle, cmd->forwardmove*2048*2); // FS: Was 2048
-	
-		if (cmd->sidemove && onground)
-			P_Thrust (player, player->mo->angle-ANG90, cmd->sidemove*2048*2); // FS: Was 2048
-	}*/
+	    P_Thrust (player, player->mo->angle, cmd->forwardmove*2048);
+    
+        if (cmd->sidemove && onground)
+	    P_Thrust (player, player->mo->angle-ANG90, cmd->sidemove*2048);
+	}
 
 	if ( (cmd->forwardmove || cmd->sidemove) && player->mo->state == &states[S_PLAY] )
 	{

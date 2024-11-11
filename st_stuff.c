@@ -572,6 +572,8 @@ ST_Responder (event_t* ev)
 		}
 		if ( (!netgame && gameskill != sk_nightmare) || M_CheckParm("-cheats") )
 		{
+			if(newCheats) // 2024/11/10 let's make these optional
+			{
 			if (cht_CheckCheat(&cheat_finishmap, ev->data1)) // FS: Finish map instantly cheat
 			{
 				if (gamemode == commercial)
@@ -637,6 +639,7 @@ ST_Responder (event_t* ev)
 				HU_SetMessage(plyr,"MASSACRE!", true);
 				P_Massacre();
 			}
+			} // 2024/11/10 end new cheats (I think)
 		      // 'dqd' cheat for toggleable god mode
 			if (cht_CheckCheat(&cheat_god, ev->data1))
 			{
@@ -664,7 +667,8 @@ ST_Responder (event_t* ev)
 				for (i=0;i<NUMAMMO;i++)
 					plyr->ammo[i] = plyr->maxammo[i];
 
-				if(plyr->backpack == false) // FS: Give us the backpack and maxed out too, ya know...
+				// 2024/11/10 preserve original behaviour if new cheats not enabled
+				if(plyr->backpack == false && newCheats) // FS: Give us the backpack and maxed out too, ya know...
 				{
 					for(i = 0; i < NUMAMMO; i++)
 					{
@@ -690,6 +694,8 @@ ST_Responder (event_t* ev)
 				for (i=0;i<NUMCARDS;i++)
 					plyr->cards[i] = true;
 
+				if(newCheats) // 2024/11/10 preserve original behaviour if new cheats not enabled
+				{
 				if(plyr->backpack == false) // FS: Give us the backpack and maxed out too, ya know...
 				{
 					for(i = 0; i < NUMAMMO; i++)
@@ -697,6 +703,7 @@ ST_Responder (event_t* ev)
 						plyr->ammo[i] = plyr->maxammo[i] *= 2;
 					}
 					plyr->backpack = true;
+				}
 				}
 	
 				plyr->message = DEH_String(STSTR_KFAADDED);
@@ -905,7 +912,13 @@ void ST_updateFaceWidget(void)
 	    // being attacked
 	    priority = 7;
 	    
-	    if (plyr->health - st_oldhealth > ST_MUCHPAIN)
+	    if (plyr->health - st_oldhealth > ST_MUCHPAIN && !bugFix) // 2024/11/10 only preserve old behaviour when bugfix disabled
+	    {
+		st_facecount = ST_TURNCOUNT;
+		st_faceindex = ST_calcPainOffset() + ST_OUCHOFFSET;
+	    }
+		// 2024/11/10 optionally fix the outch face bug
+	    if (st_oldhealth - plyr->health > ST_MUCHPAIN && bugFix)
 	    {
 		st_facecount = ST_TURNCOUNT;
 		st_faceindex = ST_calcPainOffset() + ST_OUCHOFFSET;
@@ -958,7 +971,14 @@ void ST_updateFaceWidget(void)
 	// getting hurt because of your own damn stupidity
 	if (plyr->damagecount)
 	{
-	    if (plyr->health - st_oldhealth > ST_MUCHPAIN)
+	    if (plyr->health - st_oldhealth > ST_MUCHPAIN && !bugFix) // 2024/11/10 preserve old behaviour only when bugfix disabled
+	    {
+		priority = 7;
+		st_facecount = ST_TURNCOUNT;
+		st_faceindex = ST_calcPainOffset() + ST_OUCHOFFSET;
+	    }
+		// 2024/11/10 fix ouch face bug
+	    if (st_oldhealth - plyr->health > ST_MUCHPAIN && bugFix)
 	    {
 		priority = 7;
 		st_facecount = ST_TURNCOUNT;

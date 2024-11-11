@@ -10,6 +10,10 @@ extern boolean noprecache;
 extern boolean noquitsound;
 extern boolean nowipe;
 extern boolean usePalFlash;
+extern boolean alwaysRun; // 2024/11/10 make always run optional
+extern boolean secretCount; // 2024/11/10 make secret counter optional
+extern boolean bugFix; // 2024/11/10 vanilla bugfixes now optional
+extern boolean newCheats; // 2024/11/10 new cheats now optional
 
 /* FS: Custom weapon keys */
 extern boolean	use_wpnbinds;

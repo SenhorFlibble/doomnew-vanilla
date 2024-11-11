@@ -33,7 +33,7 @@
 #define HU_TITLET	(mapnamest[gamemap-1])
 #define HU_TITLEHEIGHT	1
 #define HU_TITLEX	0
-#define HU_TITLEY	(157 - SHORT(hu_font[0]->height)) // FS: Was 167
+#define HU_TITLEY	(167 - SHORT(hu_font[0]->height)) // FS: Was 167 // 2024/11/10 swapped secret counter and map title
 
 #define HU_INPUTTOGGLE	't'
 #define HU_INPUTX	HU_MSGX
@@ -43,7 +43,7 @@
 
  // FS: SECRETS FOUND automap text
 #define HU_SECRETX 0
-#define HU_SECRETY (167 - SHORT(hu_font[0]->height))
+#define HU_SECRETY (157 - SHORT(hu_font[0]->height)) // 2024/11/10 swapped secret counter and map title
 
 // FS: Time clock automap text
 #define HU_TIMEX 0
@@ -621,7 +621,8 @@ void HU_Drawer(void)
     if (automapactive)
     {
 		HUlib_drawTextLine(&w_title, false);
-		HU_SetupSecretsText(); // FS: SECRETS FOUND automap text
+		if(secretCount)  // 2024/11/10 make secrets counter optional
+			HU_SetupSecretsText(); // FS: SECRETS FOUND automap text
 		if(drawTime)
 			HU_SetupTimeText(); // FS: Time clock on automap text
 	}

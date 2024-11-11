@@ -1,3 +1,15 @@
+11-11-24
+ - Restored Lost Souls bouncing bug for non-Ultimate/Final Doom
+ - New options available in EXTEND.CFG:
+   + always run on/off
+   + secret counter & message on/off
+   + new cheats & backpack with addmo cheat on/off
+ - Optional bug fixes (enable in EXTEND.CFG):
+   + ouch face bug
+   + picked a medikit that you REALLY needed!
+   + never changing sky in Doom II
+   + Final Doom teleporter bug
+
 10-27-24
  - Imported original planar mode code from gamesrc-ver-recreation and
    Doom Vanille

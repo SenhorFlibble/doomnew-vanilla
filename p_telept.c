@@ -103,7 +103,13 @@ EV_Teleport
 		if (!P_TeleportMove (thing, m->x, m->y))
 		    return 0;
 		
-		thing->z = thing->floorz;  //fixme: not needed?
+		if(!bugFix)
+		{
+			if(!(plutonia || tnt)) // 2024/11/11 exception adapted from Doom Vanille
+				thing->z = thing->floorz;  //fixme: not needed?
+		}
+		else
+			thing->z = thing->floorz; // 2024/11/11 should work for all versions w/ bugfix on
 		if (thing->player)
 		    thing->player->viewz = thing->z+thing->player->viewheight;
 				
