@@ -166,10 +166,11 @@ boolean noprecache;
 boolean noquitsound;
 boolean nowipe;
 boolean usePalFlash;
-boolean alwaysRun; // 2024/11/10
-boolean secretCount; // 2024/11/10
-boolean bugFix; // 2024/11/10
-boolean newCheats; // 2024/11/10
+boolean alwaysRun; // 2024/11/10 toggle always run
+boolean secretCount; // 2024/11/10 toggle secret counter
+boolean bugFix; // 2024/11/10 toggle vanilla bug fixes
+boolean newCheats; // 2024/11/10 make new cheats optional
+boolean varPitch; // 2024/11/12 variable sound pitch
 /* FS: For custom weapon binds */
 boolean	use_wpnbinds;
 int	wpn_shotgun;
@@ -300,6 +301,7 @@ default_t	extendeddefaults[] =
 	{ "secretCount", &secretCount, 0}, // 2024/11/10
 	{ "bugFix", &bugFix, 0}, // 2024/11/10
 	{ "newCheats", &newCheats, 0}, // 2024/11/10
+	{ "varPitch", &varPitch, 0}, // 2024/11/12
 
 	// FS: Use custom weapon binds
 	{ "use_wpnbinds", &use_wpnbinds, 0},
